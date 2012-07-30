@@ -21,6 +21,7 @@
 #  MA 02110-1301, USA.
 
 from urllib import urlopen
+from sys import stdout
 
 class moucrawl:
 	def __init__(self):
@@ -48,20 +49,21 @@ class moucrawl:
 		try:
 			page = urlopen(link).read()
 		except(IOError):
-			return []
+			return([])
 		links = []
 		protocols = ["http://", "https://", "ftp://"]
-		items = page.split('"') + page.split("'")#separing the quotes to find links faster
+		items = page.split('"') + page.split("'")#separing with quotes to find links faster
 		for item in items:
 			for protocol in protocols:
 				try:
 					if (protocol in item[:len(protocol)]):
 						links.append(item)
-				except(IOError):
+				except(IndexError):
 					pass
 		self.links.extend(links)
 		if (display):
-			print("From %s:\n%s" % (link, "\n".join(list(set(links)))))
+			stdout.write("\rFound %i links" % len(self))
+			stdout.flush()
 		return(list(set(links)))
 
 def main():
@@ -72,7 +74,9 @@ def main():
 		crawler.crawl(raw_input("start searching with this link: "))
 	except(KeyboardInterrupt):
 		print("[*] Keyboard Interrupt!")
-		print("found %s links" % len(crawler))
+	print("found %s links" % len(crawler))
+	with open("links.html", "a") as file:
+		file.write("\n%s" % "\n\n".join(crawler.all_links()))
 
 if __name__ == "__main__":
 	main()
