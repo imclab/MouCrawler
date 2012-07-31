@@ -28,8 +28,7 @@ class moucrawl:
 		'''The tiny web crawler'''
 		self.links = []
 		self.crawled = []
-		self.requests_done = 0
-		
+
 	def __len__(self):
 		return(len(self.all_links()))
 	
@@ -56,7 +55,6 @@ class moucrawl:
 			self.crawled.append(link)
 		try:
 			page = urlopen(link).read()
-			self.requests_done += 1
 		except(IOError):
 			return([])
 		domain = "http://%s" % link.split("/")[2]
@@ -68,15 +66,18 @@ class moucrawl:
 				try:
 					if (start_with in item[:len(start_with)]):
 						if (start_with == "/"):
-							links.append(domain + item)
+							url = domain + item
 						else:
-							links.append(item)
+							url = item
+						if ("/>" in url):
+							url = url[:url.find("/>")+1]
+						links.append(url)
 				except(IndexError):
 					pass
 		links = list(set(links))
 		self.links.extend(links)
 		if (display):
-			stdout.write("\rFound %i urls %i requests done." % (len(self), self.requests_done))
+			stdout.write("\rFound %i urls %i requests done." % (len(self), len(self.crawled)))
 			stdout.flush()
 		return(links)
 
