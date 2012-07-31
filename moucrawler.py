@@ -27,6 +27,8 @@ class moucrawl:
 	def __init__(self):
 		'''The tiny web crawler'''
 		self.links = []
+		self.crawled = []
+		self.requests_done = 0
 		
 	def __len__(self):
 		return(len(self.all_links()))
@@ -37,21 +39,21 @@ class moucrawl:
 	
 	def crawl(self, link):
 		'''Basic crawler recursive function'''
-		links = []
 		for url in self.get_links(link):
-			if (url not in links):
+			if (url not in self.crawled):
 				self.crawl(url)
-			links.append(url)
+				self.crawled.append(url)
 	
 	def get_links(self, link, display=True):
 		'''This function load a page and return all external links into it
 		its also add links to the list of links accessible with self.all_links()'''
 		try:
 			page = urlopen(link).read()
+			self.requests_done += 1
 		except(IOError):
 			return([])
 		links = []
-		protocols = ["http://", "https://", "ftp://"]
+		protocols = ["http://", "https://"]
 		items = page.split('"') + page.split("'")#separing with quotes to find links faster
 		for item in items:
 			for protocol in protocols:
@@ -62,7 +64,7 @@ class moucrawl:
 					pass
 		self.links.extend(links)
 		if (display):
-			stdout.write("\rFound %i links" % len(self))
+			stdout.write("\rFound %i urls %i requests done." % (len(self), self.requests_done))
 			stdout.flush()
 		return(list(set(links)))
 
