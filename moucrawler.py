@@ -33,9 +33,14 @@ class moucrawl:
 	def __len__(self):
 		return(len(self.all_links()))
 	
+	def reorder(self):
+		'''Delete duplicate links'''
+		self.links = list(set(self.links))
+	
 	def all_links(self):
 		'''This function return all found links and delete doubles before'''
-		return(list(set(self.links)))
+		self.reorder()
+		return(self.links)
 	
 	def crawl(self, link):
 		'''Basic crawler recursive function'''
@@ -62,11 +67,12 @@ class moucrawl:
 						links.append(item)
 				except(IndexError):
 					pass
+		links = list(set(links))
 		self.links.extend(links)
 		if (display):
 			stdout.write("\rFound %i urls %i requests done." % (len(self), self.requests_done))
 			stdout.flush()
-		return(list(set(links)))
+		return(links)
 
 def main():
 	'''Example of moucrawler'''
@@ -77,8 +83,11 @@ def main():
 	except(KeyboardInterrupt):
 		print("[*] Keyboard Interrupt!")
 	print("found %s links" % len(crawler))
+	html_page = ''
+	for link in crawler.all_links():
+		html_page += '<a href="%s">%s</a>\n' % (link, link)
 	with open("links.html", "a") as file:
-		file.write("\n%s" % "\n\n".join(crawler.all_links()))
+		file.write(html_page)
 
 if __name__ == "__main__":
 	main()
