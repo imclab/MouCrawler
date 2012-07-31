@@ -45,13 +45,15 @@ class moucrawl:
 	def crawl(self, link):
 		'''Basic crawler recursive function'''
 		for url in self.get_links(link):
-			if (url not in self.crawled):
-				self.crawl(url)
-				self.crawled.append(url)
+			self.crawl(url)
 	
 	def get_links(self, link, display=True):
 		'''This function load a page and return all external links into it
 		its also add links to the list of links accessible with self.all_links()'''
+		if (link in self.crawled):
+			return []
+		else:
+			self.crawled.append(link)
 		try:
 			page = urlopen(link).read()
 			self.requests_done += 1
