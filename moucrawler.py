@@ -85,10 +85,10 @@ def main():
 		crawler.crawl(raw_input("start crawler link (do not forget the 'http://'\n: "))
 	except(KeyboardInterrupt):
 		print("\nKeyboard Interrupt")
-	html_page = ''
+	html_page = '<title>Sites Found</title>'
 	for link in crawler.all_links():
-		html_page += '<a href="%s">%s</a>\n' % (link, link)
-	with open("links.html", "a") as file:
+		html_page += '</br ><a href="%s" target=_blanc>%s</a>\n' % (link, link)
+	with open("links.html", "w") as file:
 		file.write(html_page)
 	
 
