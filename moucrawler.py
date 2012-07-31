@@ -76,18 +76,17 @@ class moucrawl:
 
 def main():
 	'''Example of moucrawler'''
-	print("CTRL+C to quit")
 	crawler = moucrawl()
 	try:
 		crawler.crawl(raw_input("start searching with this link: "))
 	except(KeyboardInterrupt):
-		print("[*] Keyboard Interrupt!")
-	print("found %s links" % len(crawler))
+		print("\nKeyboard Interrupt")
 	html_page = ''
 	for link in crawler.all_links():
 		html_page += '<a href="%s">%s</a>\n' % (link, link)
 	with open("links.html", "a") as file:
 		file.write(html_page)
+	
 
 if __name__ == "__main__":
 	main()
