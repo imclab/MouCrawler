@@ -57,14 +57,18 @@ class moucrawl:
 			self.requests_done += 1
 		except(IOError):
 			return([])
+		domain = "http://%s" % link.split("/")[2]
 		links = []
-		protocols = ["http://", "https://"]
-		items = page.split('"') + page.split("'")#separing with quotes to find links faster
+		start_withs = ["http://", "https://", "/"]
+		items = page.split('"') + page.split("'")
 		for item in items:
-			for protocol in protocols:
+			for start_with in start_withs:
 				try:
-					if (protocol in item[:len(protocol)]):
-						links.append(item)
+					if (start_with in item[:len(start_with)]):
+						if (start_with == "/"):
+							links.append(domain + item)
+						else:
+							links.append(item)
 				except(IndexError):
 					pass
 		links = list(set(links))
@@ -78,7 +82,7 @@ def main():
 	'''Example of moucrawler'''
 	crawler = moucrawl()
 	try:
-		crawler.crawl(raw_input("start searching with this link: "))
+		crawler.crawl(raw_input("start crawler link (do not forget the 'http://'\n: "))
 	except(KeyboardInterrupt):
 		print("\nKeyboard Interrupt")
 	html_page = ''
