@@ -69,8 +69,8 @@ class MouCrawler:
 		domain = ("http://%s" % link.split("/")[2])
 		links = []
 		url = ''
-		items = (page.split('"') + page.split("'"))
-		for potential_link in items:
+		page_items = (page.split('"') + page.split("'"))
+		for potential_link in page_items:
 			if ("/" == potential_link[:1]):
 				url = domain + potential_link
 			elif ("http" == potential_link[:len("http")]):
@@ -80,6 +80,8 @@ class MouCrawler:
 				url = url[:url.find("/>")+1]
 			if ("/*" in url):
 				url = url[:url.find("/*")]
+			if (url.count("//") >= 2):
+				url = 'http://' + url.split("//")[2]
 			#end cut and repair non html links
 			links.append(url)
 		links = list(set(links))
