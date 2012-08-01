@@ -20,6 +20,16 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 
+__author__ = "Arnaud Alies"
+__version__ = 3.0
+__doc__ = """
+MouCrawler
+
+A python web crawler based on
+the principe if http:// https:// or / is after a quote
+its a link
+"""
+
 from urllib import urlopen
 from sys import stdout
 
@@ -32,19 +42,19 @@ class MouCrawler:
 	def __len__(self):
 		return(len(self.all_links()))
 	
-	def Reorder(self):
+	def reorder(self):
 		'''Delete duplicate links'''
 		self.links = list(set(self.links))
 	
 	def all_links(self):
 		'''This function return all found links and delete doubles before'''
-		self.Reorder()
+		self.reorder()
 		return(self.links)
 	
-	def Crawl(self, link):
+	def crawl(self, link):
 		'''Basic crawler recursive function'''
 		for url in self.get_links(link):
-			self.Crawl(url)
+			self.crawl(url)
 	
 	def get_links(self, link, display=True):
 		'''This function load a page and return all external links into it
@@ -70,6 +80,8 @@ class MouCrawler:
 							url = item
 						if ("/>" in url):
 							url = url[:url.find("/>")+1]
+						if ("/*" in url):
+							url = url[:url.find("/*")]
 						links.append(url)
 				except(IndexError):
 					pass
@@ -84,7 +96,7 @@ def main():
 	'''Example of moucrawler'''
 	crawler = MouCrawler()
 	try:
-		crawler.Crawl(raw_input("start crawler link (do not forget the 'http://'\n: "))
+		crawler.crawl(raw_input("start crawler link (do not forget the 'http://'\n: "))
 	except(KeyboardInterrupt):
 		print("\nKeyboard Interrupt")
 	html_page = '<title>Sites Found</title>'
