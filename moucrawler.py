@@ -32,13 +32,13 @@ class MouCrawler:
 	def __len__(self):
 		return(len(self.all_links()))
 	
-	def reOrder(self):
+	def Reorder(self):
 		'''Delete duplicate links'''
 		self.links = list(set(self.links))
 	
 	def all_links(self):
 		'''This function return all found links and delete doubles before'''
-		self.reOrder()
+		self.Reorder()
 		return(self.links)
 	
 	def Crawl(self, link):
