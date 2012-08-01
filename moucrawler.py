@@ -72,19 +72,16 @@ class MouCrawler:
 		items = page.split('"') + page.split("'")
 		for item in items:
 			for begin in beginnings:
-				try:
-					if (begin in item[:len(begin)]):
-						if (begin == "/"):
-							url = domain + item
-						else:
-							url = item
-						if ("/>" in url):
-							url = url[:url.find("/>")+1]
-						if ("/*" in url):
-							url = url[:url.find("/*")]
-						links.append(url)
-				except(IndexError):
-					pass
+				if (begin in item[:len(begin)]):
+					if (begin == "/"):
+						url = domain + item
+					else:
+						url = item
+					if ("/>" in url):
+						url = url[:url.find("/>")+1]
+					if ("/*" in url):
+						url = url[:url.find("/*")]
+					links.append(url)
 		links = list(set(links))
 		self.links.extend(links)
 		if (display):
