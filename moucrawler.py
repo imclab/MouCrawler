@@ -26,8 +26,8 @@ __doc__ = """
 MouCrawler
 
 A python web crawler based on
-the principe if http:// https:// or / is after a quote
-its a link
+the principe if http or / is after a quote
+should be a link
 """
 
 from urllib import urlopen
@@ -66,22 +66,22 @@ class MouCrawler:
 			page = urlopen(link).read()
 		except(IOError):
 			return([])
-		domain = "http://%s" % link.split("/")[2]
+		domain = ("http://%s" % link.split("/")[2])
 		links = []
-		beginnings = ["http://", "https://", "/"]
-		items = page.split('"') + page.split("'")
-		for item in items:
-			for begin in beginnings:
-				if (begin in item[:len(begin)]):
-					if (begin == "/"):
-						url = domain + item
-					else:
-						url = item
-					if ("/>" in url):
-						url = url[:url.find("/>")+1]
-					if ("/*" in url):
-						url = url[:url.find("/*")]
-					links.append(url)
+		url = ''
+		items = (page.split('"') + page.split("'"))
+		for potential_link in items:
+			if ("/" == potential_link[:1]):
+				url = domain + potential_link
+			elif ("http" == potential_link[:len("http")]):
+					url = potential_link
+			#begin cut and repair non html links
+			if ("/>" in url):
+				url = url[:url.find("/>")+1]
+			if ("/*" in url):
+				url = url[:url.find("/*")]
+			#end cut and repair non html links
+			links.append(url)
 		links = list(set(links))
 		self.links.extend(links)
 		if (display):
