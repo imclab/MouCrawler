@@ -23,49 +23,48 @@
 from urllib import urlopen
 from sys import stdout
 
-class moucrawl:
+class MouCrawler:
 	def __init__(self):
 		'''The tiny web crawler'''
 		self.links = []
-		self.crawled = []
+		self.tested = []
 
 	def __len__(self):
 		return(len(self.all_links()))
 	
-	def reorder(self):
+	def reOrder(self):
 		'''Delete duplicate links'''
 		self.links = list(set(self.links))
 	
 	def all_links(self):
 		'''This function return all found links and delete doubles before'''
-		self.reorder()
+		self.reOrder()
 		return(self.links)
 	
-	def crawl(self, link):
+	def Crawl(self, link):
 		'''Basic crawler recursive function'''
 		for url in self.get_links(link):
-			self.crawl(url)
+			self.Crawl(url)
 	
 	def get_links(self, link, display=True):
 		'''This function load a page and return all external links into it
 		its also add links to the list of links accessible with self.all_links()'''
-		if (link in self.crawled):
-			return []
-		else:
-			self.crawled.append(link)
+		if (link in self.tested):
+			return([])
+		self.tested.append(link)
 		try:
 			page = urlopen(link).read()
 		except(IOError):
 			return([])
 		domain = "http://%s" % link.split("/")[2]
 		links = []
-		start_withs = ["http://", "https://", "/"]
+		beginnings = ["http://", "https://", "/"]
 		items = page.split('"') + page.split("'")
 		for item in items:
-			for start_with in start_withs:
+			for begin in beginnings:
 				try:
-					if (start_with in item[:len(start_with)]):
-						if (start_with == "/"):
+					if (begin in item[:len(begin)]):
+						if (begin == "/"):
 							url = domain + item
 						else:
 							url = item
@@ -77,15 +76,15 @@ class moucrawl:
 		links = list(set(links))
 		self.links.extend(links)
 		if (display):
-			stdout.write("\rFound %i urls %i requests done." % (len(self), len(self.crawled)))
+			stdout.write("\rFound %i urls %i requests done." % (len(self), len(self.tested)))
 			stdout.flush()
 		return(links)
 
 def main():
 	'''Example of moucrawler'''
-	crawler = moucrawl()
+	crawler = MouCrawler()
 	try:
-		crawler.crawl(raw_input("start crawler link (do not forget the 'http://'\n: "))
+		crawler.Crawl(raw_input("start crawler link (do not forget the 'http://'\n: "))
 	except(KeyboardInterrupt):
 		print("\nKeyboard Interrupt")
 	html_page = '<title>Sites Found</title>'
