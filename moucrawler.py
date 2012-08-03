@@ -43,21 +43,6 @@ class MouCrawler:
 	def __len__(self):
 		return len(self.links)
 	
-	def __repr__(self):
-		return "\n".join(list(self.links))
-	
-	def __getitem__(self, x):
-		return list(self.links)[x]
-	
-	@staticmethod
-	def repair_link(link):
-		if ("/>" in link):
-			link = link[:link.find("/>")+1]
-		if ("/*" in link):
-			link = link[:link.find("/*")]
-		if (link.count("//") >= 2):
-			link = 'http://' + link.split("//")[2]
-		return link
 	
 	def all_links(self):
 		"""return all links found"""
@@ -89,12 +74,9 @@ class MouCrawler:
 			else:
 				new = ''
 			#begin cut and repair non html links
-			if ("/>" in new):
-				new = new[:new.find("/>")+1]
-			if ("/*" in new):
-				new = new[:new.find("/*")]
-			if (new.count("//") >= 2):
-				new = 'http://' + new.split("//")[2]
+			if ("/>" in new):new = new[:new.find("/>")+1]
+			if ("/*" in new):new = new[:new.find("/*")]
+			if (new.count("//") >= 2):new = 'http://' + new.split("//")[2]
 			#end cut and repair non html links
 			links.add(new)
 		self.links = self.links.union(links)
@@ -106,10 +88,12 @@ class MouCrawler:
 def main():
 	'''Example of moucrawler'''
 	crawler = MouCrawler(display=True)
+	site = raw_input("start crawler link (do not forget the 'http://'\n: ")
 	try:
-		crawler.crawl(raw_input("start crawler link (do not forget the 'http://'\n: "))
+		crawler.crawl(site)
 	except(KeyboardInterrupt):
 		print("\nKeyboard Interrupt")
+	#writing out the page
 	html_page = '<title>Sites Found</title>'
 	for link in crawler.all_links():
 		html_page += '</br ><a href="%s" target=_blanc>%s</a>\n' % (link, link)
