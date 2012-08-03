@@ -21,7 +21,7 @@
 #  MA 02110-1301, USA.
 
 __author__ = "Arnaud Alies"
-__version__ = 3.0
+__version__ = 4.0
 __doc__ = """
 MouCrawler
 
@@ -34,66 +34,78 @@ from urllib import urlopen
 from sys import stdout
 
 class MouCrawler:
-	def __init__(self):
+	def __init__(self, display=False):
 		'''The tiny web crawler'''
-		self.links = []
-		self.tested = []
+		self.display = display
+		self.links = set()
+		self.tested = set()
 
 	def __len__(self):
-		return(len(self.all_links()))
+		return len(self.links)
 	
-	def reorder(self):
-		'''Delete duplicate links'''
-		self.links = list(set(self.links))
+	def __repr__(self):
+		return "\n".join(list(self.links))
+	
+	def __getitem__(self, x):
+		return list(self.links)[x]
+	
+	@staticmethod
+	def repair_link(link):
+		if ("/>" in link):
+			link = link[:link.find("/>")+1]
+		if ("/*" in link):
+			link = link[:link.find("/*")]
+		if (link.count("//") >= 2):
+			link = 'http://' + link.split("//")[2]
+		return link
 	
 	def all_links(self):
-		'''This function return all found links and delete doubles before'''
-		self.reorder()
-		return(self.links)
+		"""return all links found"""
+		return list(self.links)
 	
 	def crawl(self, link):
-		'''Basic crawler recursive function'''
+		'''Main crawler recursive function'''
 		for url in self.get_links(link):
 			self.crawl(url)
 	
-	def get_links(self, link, display=True):
+	def get_links(self, link):
 		'''This function load a page and return all external links into it
 		its also add links to the list of links accessible with self.all_links()'''
 		if (link in self.tested):
-			return([])
-		self.tested.append(link)
+			return []
+		self.tested.add(link)
 		try:
 			page = urlopen(link).read()
-		except(IOError):
-			return([])
+		except IOError:
+			return []
+		links = set()
 		domain = ("http://%s" % link.split("/")[2])
-		links = []
-		url = ''
 		page_items = (page.split('"') + page.split("'"))
 		for potential_link in page_items:
-			if ("/" == potential_link[:1]):
-				url = domain + potential_link
-			elif ("http" == potential_link[:len("http")]):
-					url = potential_link
+			if (potential_link.startswith("http")):
+				new = potential_link
+			elif (potential_link.startswith("/")):
+				new = domain + potential_link
+			else:
+				new = ''
 			#begin cut and repair non html links
-			if ("/>" in url):
-				url = url[:url.find("/>")+1]
-			if ("/*" in url):
-				url = url[:url.find("/*")]
-			if (url.count("//") >= 2):
-				url = 'http://' + url.split("//")[2]
+			if ("/>" in new):
+				new = new[:new.find("/>")+1]
+			if ("/*" in new):
+				new = new[:new.find("/*")]
+			if (new.count("//") >= 2):
+				new = 'http://' + new.split("//")[2]
 			#end cut and repair non html links
-			links.append(url)
-		links = list(set(links))
-		self.links.extend(links)
-		if (display):
+			links.add(new)
+		self.links = self.links.union(links)
+		if (self.display):
 			stdout.write("\rFound %i urls %i requests done." % (len(self), len(self.tested)))
 			stdout.flush()
-		return(links)
+		return list(links)
 
 def main():
 	'''Example of moucrawler'''
-	crawler = MouCrawler()
+	crawler = MouCrawler(display=True)
 	try:
 		crawler.crawl(raw_input("start crawler link (do not forget the 'http://'\n: "))
 	except(KeyboardInterrupt):
