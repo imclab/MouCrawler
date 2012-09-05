@@ -98,12 +98,10 @@ def main():
 	#writing out the page
 	file = open("links.html.tmp", "w")
 	file.write('<title>Sites Found</title>')
-	file.flush()
-	fsync(file.fileno())
 	for link in crawler.all_links():
 		file.write('</br ><a href="%s" target=_blanc>%s</a>\n' % (link, link))
-		file.flush()
-		fsync(file.fileno())
+	file.flush()
+	fsync(file.fileno())
 	file.close()
 	rename("links.html.tmp", "links.html")
 
