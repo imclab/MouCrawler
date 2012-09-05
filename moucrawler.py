@@ -96,10 +96,11 @@ def main():
 	except(KeyboardInterrupt):
 		print("\nKeyboard Interrupt")
 	#writing out the page
-	file = open("links.html.tmp", "w")
-	file.write('<title>Sites Found</title>')
+	html_page = '<title>Sites Found</title>'
 	for link in crawler.all_links():
-		file.write('</br ><a href="%s" target=_blanc>%s</a>\n' % (link, link))
+		html_page += '</br ><a href="%s" target=_blanc>%s</a>\n' % (link, link)
+	file = open("links.html.tmp", "w")
+	file.write(html_page)
 	file.flush()
 	fsync(file.fileno())
 	file.close()
