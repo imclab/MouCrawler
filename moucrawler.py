@@ -32,6 +32,7 @@ should be a link
 
 from urllib import urlopen
 from sys import stdout
+from os import fsync, rename
 
 class MouCrawler:
 	def __init__(self, display=False):
@@ -98,9 +99,12 @@ def main():
 	html_page = '<title>Sites Found</title>'
 	for link in crawler.all_links():
 		html_page += '</br ><a href="%s" target=_blanc>%s</a>\n' % (link, link)
-	with open("links.html", "w") as file:
-		file.write(html_page)
-	
+	file = open("links.html.tmp", "w")
+	file.write(html_page)
+	file.flush()
+	fsync(file.fileno())
+	file.close()
+	rename("links.html.tmp", "links.html")
 
 if __name__ == "__main__":
 	main()
