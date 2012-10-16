@@ -30,9 +30,9 @@ the principe if http or / is after a quote
 should be a link
 """
 
-from urllib import urlopen
+from urllib import urlopen, urlretrieve
 from sys import stdout
-from os import fsync, rename
+from os import fsync, rename, remove
 
 class MouCrawler:
 	def __init__(self, display=False):
@@ -87,6 +87,22 @@ class MouCrawler:
 			stdout.flush()
 		return list(links)
 
+def seekAndDownload(links, formats):
+	'''Download all files from x formats
+	example: seekAndDownloadImages(list(crawler.all_links()), ["PNG", "MNG", "TIFF", "JPEG", "GIF", "TGA", "JPG", "RAW"])'''
+	for link in links:
+		for image_format in formats:
+				if link.upper().endswith(".%s" % image_format):
+					if ("/" in link):
+						file_name = link.split("/")[len(link.split("/"))-1]
+					else:
+						file_name = link
+					try:
+						urlretrieve(link, file_name)
+					except IOError:
+						pass
+
+
 def main():
 	'''Example of moucrawler'''
 	crawler = MouCrawler(display=True)
@@ -104,7 +120,13 @@ def main():
 	file.flush()
 	fsync(file.fileno())
 	file.close()
+	try:
+		remove("links.html")
+	except:
+		pass
 	rename("links.html.tmp", "links.html")
+	
+	return 0
 
 if __name__ == "__main__":
 	main()
