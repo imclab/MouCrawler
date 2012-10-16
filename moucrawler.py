@@ -21,7 +21,7 @@
 #  MA 02110-1301, USA.
 
 __author__ = "Arnaud Alies"
-__version__ = 4.0
+__version__ = 5.0
 __doc__ = """
 MouCrawler
 
@@ -92,12 +92,13 @@ def seekAndDownload(links, formats):
 	example: seekAndDownload(list(crawler.all_links()), ["PNG", "MNG", "TIFF", "JPEG", "GIF", "TGA", "JPG", "RAW"])'''
 	for link in links:
 		for image_format in formats:
-				if link.upper().endswith(".%s" % image_format):
+				if link.upper().endswith(".%s" % image_format.upper()):
 					if ("/" in link):
 						file_name = link.split("/")[len(link.split("/"))-1]
 					else:
 						file_name = link
 					try:
+						print("Downloading: %s" % link)
 						urlretrieve(link, file_name)
 					except IOError:
 						pass
@@ -106,11 +107,23 @@ def seekAndDownload(links, formats):
 def main():
 	'''Example of moucrawler'''
 	crawler = MouCrawler(display=True)
-	site = raw_input("start crawler link (do not forget the 'http://'\n: ")
+	site = "http://" + raw_input("{0}\nEnter first link the crawler will use\n{0}\nhttp://".format("-"*40))
+	
+	new_format = " "
+	formats_to_download = []
+	print("Enter file formats you want to get\nex: enter png to download all png image found on websites\nenter nothing press enter when you are done")
+	while new_format:
+		formats_to_download.append(new_format)
+		try:
+			new_format = raw_input("> ")
+		except KeyboardInterrupt:
+			pass
+		
+	print("Starting crawler...\npress CTRL+C to save and exit")
 	try:
 		crawler.crawl(site)
 	except(KeyboardInterrupt):
-		print("\nKeyboard Interrupt")
+		print("\nSaving links")
 	#writing out the page
 	html_page = '<title>Sites Found</title>'
 	for link in crawler.all_links():
@@ -125,8 +138,9 @@ def main():
 	except:
 		pass
 	rename("links.html.tmp", "links.html")
-	
+	seekAndDownload(crawler.all_links(), formats_to_download)
 	return 0
 
 if __name__ == "__main__":
 	main()
+	raw_input("Press enter to exit")
