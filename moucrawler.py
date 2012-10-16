@@ -89,7 +89,7 @@ class MouCrawler:
 
 def seekAndDownload(links, formats):
 	'''Download all files from x formats
-	example: seekAndDownloadImages(list(crawler.all_links()), ["PNG", "MNG", "TIFF", "JPEG", "GIF", "TGA", "JPG", "RAW"])'''
+	example: seekAndDownload(list(crawler.all_links()), ["PNG", "MNG", "TIFF", "JPEG", "GIF", "TGA", "JPG", "RAW"])'''
 	for link in links:
 		for image_format in formats:
 				if link.upper().endswith(".%s" % image_format):
