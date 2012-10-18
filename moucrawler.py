@@ -32,7 +32,7 @@ should be a link
 
 from urllib import urlopen, urlretrieve
 from sys import stdout
-from os import fsync, rename, remove
+from os import fsync, rename, remove, mkdir
 
 class MouCrawler:
 	def __init__(self, display=False):
@@ -90,6 +90,13 @@ class MouCrawler:
 def seekAndDownload(links, formats):
 	'''Download all files from x formats
 	example: seekAndDownload(list(crawler.all_links()), ["PNG", "MNG", "TIFF", "JPEG", "GIF", "TGA", "JPG", "RAW"])'''
+	if not formats:
+		return 0
+	path = "_".join(formats)
+	try:
+		mkdir(path)
+	except:
+		pass
 	for link in links:
 		for image_format in formats:
 				if link.upper().endswith(".%s" % image_format.upper()):
@@ -99,9 +106,10 @@ def seekAndDownload(links, formats):
 						file_name = link
 					try:
 						print("Downloading: %s" % link)
-						urlretrieve(link, file_name)
+						urlretrieve(link, "%s//%s" % (path, file_name))
 					except IOError:
 						pass
+	return 0
 
 
 def main():
@@ -143,4 +151,3 @@ def main():
 
 if __name__ == "__main__":
 	main()
-	raw_input("Press enter to exit")
