@@ -30,6 +30,7 @@ the principe if http or / is after a quote
 should be a link
 """
 
+import httplib
 from urllib import urlopen, urlretrieve
 from sys import stdout
 from os import fsync, rename, remove, mkdir
@@ -65,7 +66,11 @@ class MouCrawler:
 			raise IOError("link already found")
 		
 		self.tested.add(link)
-		page = urlopen(link).read()
+		try:
+			page = urlopen(link).read()
+		except httplib.InvalidURL:
+			#all errors are not repertoried
+			return []
 		links = set()
 		new = ''
 		domain = ("http://%s" % link.split("/")[2])
