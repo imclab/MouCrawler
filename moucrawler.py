@@ -68,7 +68,7 @@ class MouCrawler:
 		self.tested.add(link)
 		try:
 			page = urlopen(link).read()
-		except httplib.InvalidURL:
+		except (IOError, httplib.InvalidURL):
 			#all errors are not repertoried
 			return []
 		links = set()
