@@ -68,7 +68,7 @@ class MouCrawler:
 		self.tested.add(link)
 		try:
 			page = urlopen(link).read()
-		except (IOError, httplib.InvalidURL):
+		except (IOError, httplib.InvalidURL, TypeError):
 			#all errors are not repertoried
 			return []
 		links = set()
@@ -135,7 +135,7 @@ def main():
 	print("Starting crawler...\npress CTRL+C to save and exit")
 	try:
 		crawler.crawl(site)
-	except(KeyboardInterrupt):
+	except(KeyboardInterrupt, MemoryError):
 		print("\nSaving links")
 	#writing out the page
 	html_page = '<title>Sites Found</title>'
