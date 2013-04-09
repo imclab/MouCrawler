@@ -21,7 +21,7 @@
 #  MA 02110-1301, USA.
 
 __author__ = "Arnaud Alies"
-__version__ = 5.0
+__version__ = 5.1
 __doc__ = """
 MouCrawler
 
@@ -97,14 +97,17 @@ def seekAndDownload(links, formats):
 	example: seekAndDownload(list(crawler.all_links()), ["PNG", "MNG", "TIFF", "JPEG", "GIF", "TGA", "JPG", "RAW"])'''
 	if not formats:
 		return 0
-	path = "_".join(formats)
+	if ("*" in formats):
+		path = "Crawler Downloads"
+	else:
+		path = "_".join(formats)
 	try:
 		mkdir(path)
 	except:
 		pass
 	for link in links:
 		for image_format in formats:
-				if link.upper().endswith(".%s" % image_format.upper()):
+				if link.upper().endswith(".%s" % image_format.upper()) or "*" in formats:
 					if ("/" in link):
 						file_name = link.split("/")[len(link.split("/"))-1]
 					else:
@@ -117,40 +120,56 @@ def seekAndDownload(links, formats):
 	return 0
 
 
+	
+
 def main():
 	'''Example of moucrawler'''
+	
 	crawler = MouCrawler(display=True)
+	
 	site = "http://" + raw_input("{0}\nEnter first link the crawler will use\n{0}\nhttp://".format("-"*40))
 	
 	new_format = " "
 	formats_to_download = []
-	print("Enter file formats you want to get\nex: enter png to download all png image found on websites\nenter nothing press enter when you are done")
+	print("Enter file formats you want to get\nex: enter png to download all png image found on websites\nLeave blank and press enter when you are done")
 	while new_format:
-		formats_to_download.append(new_format)
+		#ask user to enter file formats he wants to get
 		try:
-			new_format = raw_input("> ")
+			new_format = raw_input("files.")
+			formats_to_download.append(new_format)
 		except KeyboardInterrupt:
 			pass
 		
 	print("Starting crawler...\npress CTRL+C to save and exit")
+	
 	try:
+		#crawling function
 		crawler.crawl(site)
-	except(KeyboardInterrupt, MemoryError):
+	except:
 		print("\nSaving links")
-	#writing out the page
-	html_page = '<title>Sites Found</title>'
-	for link in crawler.all_links():
-		html_page += '</br ><a href="%s" target=_blanc>%s</a>\n' % (link, link)
-	file = open("links.html.tmp", "w")
-	file.write(html_page)
+		
+	#writing out links
+	if ("y" in raw_input("Would you like to save it into html page?\nY/N: ").lower()):
+		file_format = "html"
+		text = '<title>Sites Found</title>'
+		for link in crawler.all_links():
+			text += '</br ><a href="%s" target=_blanc>%s</a>\n' % (link, link)
+	else:
+		text = ""
+		file_format = "txt"
+		for link in crawler.all_links():
+			text += "%s\n" % link
+	file = open("links.%s.tmp" % file_format, "w")
+	file.write(text)
 	file.flush()
 	fsync(file.fileno())
 	file.close()
 	try:
-		remove("links.html")
+		remove("links.%s" % file_format)
 	except:
 		pass
-	rename("links.html.tmp", "links.html")
+	rename("links.%s.tmp" % file_format, "links.%s" % file_format)
+	print("Saved")
 	seekAndDownload(crawler.all_links(), formats_to_download)
 	return 0
 
