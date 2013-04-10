@@ -156,7 +156,7 @@ def main():
 		file_format = "txt"
 		for link in crawler.all_links():
 			text += "%s\n" % link
-	try;
+	try:
 		file = open("links.%s.tmp" % file_format, "w")
 		file.write(text)
 		file.flush()
