@@ -55,7 +55,7 @@ class MouCrawler:
 		for url in self.get_links(link):
 			try:
 				self.crawl(url)
-			except IOError:
+			except (IOError, RuntimeError):
 				pass
 	
 	def get_links(self, link):
@@ -69,7 +69,6 @@ class MouCrawler:
 		try:
 			page = urlopen(link).read()
 		except (IOError, httplib.InvalidURL, TypeError):
-			#all errors are not repertoried
 			return []
 		links = set()
 		new = ''
@@ -120,8 +119,6 @@ def seekAndDownload(links, formats):
 	return 0
 
 
-	
-
 def main():
 	'''Example of moucrawler'''
 	
@@ -145,7 +142,7 @@ def main():
 	try:
 		#crawling function
 		crawler.crawl(site)
-	except:
+	except KeyboardInterrupt:
 		print("\nSaving links")
 		
 	#writing out links
@@ -170,7 +167,9 @@ def main():
 		pass
 	rename("links.%s.tmp" % file_format, "links.%s" % file_format)
 	print("Saved")
-	seekAndDownload(crawler.all_links(), formats_to_download)
+	if (formats_to_download):
+		seekAndDownload(crawler.all_links(), formats_to_download)
+	
 	return 0
 
 if __name__ == "__main__":
