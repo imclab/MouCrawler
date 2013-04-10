@@ -156,11 +156,14 @@ def main():
 		file_format = "txt"
 		for link in crawler.all_links():
 			text += "%s\n" % link
-	file = open("links.%s.tmp" % file_format, "w")
-	file.write(text)
-	file.flush()
-	fsync(file.fileno())
-	file.close()
+	try;
+		file = open("links.%s.tmp" % file_format, "w")
+		file.write(text)
+		file.flush()
+		fsync(file.fileno())
+		file.close()
+	except TypeError:
+		print("Failed to save")
 	try:
 		remove("links.%s" % file_format)
 	except:
