@@ -31,17 +31,18 @@ should be a link
 """
 
 import httplib
+import random
 from urllib import urlopen, urlretrieve
 from sys import stdout
 from os import fsync, rename, remove, mkdir
 
-class MouCrawler:
-	def __init__(self, display=False):
-		'''The tiny web crawler'''
-		self.display = display
-		self.links = set()
+class crawler:
+	def __init__(self,Display=True):
 		self.tested = set()
-
+		self.links = set()
+		self.display = Display
+		self.file_name = "links_"+str(random.randint(1,1000))+".txt"
+	
 	def __len__(self):
 		return len(self.links)
 	
@@ -52,20 +53,36 @@ class MouCrawler:
 	
 	def crawl(self, link):
 		'''Main crawler recursive function'''
-		for url in self.get_links(link):
+		if (link not in self.tested):
+			self.tested.add(link)
 			try:
-				self.crawl(url)
+				new_links = self.get_links(link)
 			except (IOError, RuntimeError):
 				pass
+		
+		f = open(self.file_name,"a")
+		
+		for url in set(new_links)-set(self.links):
+			f.write("\n"+url)
+		f.close()
+		
+		self.links = self.links.union(new_links)
+		
+		if (self.display):
+			stdout.write("\rFound %i urls %i requests done." % (len(self), len(self.tested)))
+			stdout.flush()
+		
+		try:
+			self.crawl(list(self.links-self.tested)[0])
+		except:
+			print("\nRAM full...")
+
 	
 	def get_links(self, link):
 		'''This function load a page and return all external links into it
 		its also add links to the list of links accessible with self.all_links()
 		raise an IOError if any errors'''
-		if (link in self.tested):
-			raise IOError("link already found")
 		
-		self.tested.add(link)
 		try:
 			page = urlopen(link).read()
 		except (IOError, httplib.InvalidURL, httplib.LineTooLong, TypeError):
@@ -85,11 +102,10 @@ class MouCrawler:
 			#end cut and repair non html links
 			links.add(new)
 		
-		self.links = self.links.union(links)
-		if (self.display):
-			stdout.write("\rFound %i urls %i requests done." % (len(self), len(self.tested)))
-			stdout.flush()
-		return list(links)
+		return links
+
+def save_links(links):
+	print "\n"+links
 
 def seekAndDownload(links, formats):
 	'''Download all files from x formats
@@ -118,62 +134,6 @@ def seekAndDownload(links, formats):
 						pass
 	return 0
 
-
-def main():
-	'''Example of moucrawler'''
-	
-	crawler = MouCrawler(display=True)
-	
-	site = "http://" + raw_input("{0}\nEnter first link the crawler will use\n{0}\nhttp://".format("-"*40))
-	
-	new_format = " "
-	formats_to_download = []
-	print("Enter file formats you want to get\nex: enter png to download all png image found on websites\nLeave blank and press enter when you are done")
-	while new_format:
-		#ask user to enter file formats he wants to get
-		try:
-			new_format = raw_input("files.")
-			formats_to_download.append(new_format)
-		except KeyboardInterrupt:
-			pass
-		
-	print("Starting crawler...\npress CTRL+C to save and exit")
-	
-	try:
-		#crawling function
-		crawler.crawl(site)
-	except KeyboardInterrupt:
-		print("\nSaving links")
-		
-	#writing out links
-	if ("y" in raw_input("Would you like to save it into html page?\nY/N: ").lower()):
-		file_format = "html"
-		text = '<title>Sites Found</title>'
-		for link in crawler.all_links():
-			text += '</br ><a href="%s" target=_blanc>%s</a>\n' % (link, link)
-	else:
-		text = ""
-		file_format = "txt"
-		for link in crawler.all_links():
-			text += "%s\n" % link
-	try:
-		file = open("links.%s.tmp" % file_format, "w")
-		file.write(text)
-		file.flush()
-		fsync(file.fileno())
-		file.close()
-	except TypeError:
-		print("Failed to save")
-	try:
-		remove("links.%s" % file_format)
-	except:
-		pass
-	rename("links.%s.tmp" % file_format, "links.%s" % file_format)
-	print("Saved")
-	if (formats_to_download):
-		seekAndDownload(crawler.all_links(), formats_to_download)
-	
-	return 0
-
-if __name__ == "__main__":
-	main()
+if (__name__ == "__main__"):
+	c = crawler(True)
+	print(c.crawl("http://www.google.com"))
