@@ -1,6 +1,19 @@
 import urllib
 import httplib
 import sqlite3
+import sys
+import os
+
+__version__ = "1.2"
+
+__help__ = """
+Usage:
+Add links to start the crawler database
+python MouCrawler.py database_name.db -a http://link.com
+
+Start crawling
+python MouCrawler.py database_name.db -c
+"""
 
 def get_content(info):
 	content = info.getheaders("Content-Type")
@@ -38,24 +51,31 @@ def get_links(link):
 
 
 class Crawler:
-	def __init__(self, start_link):
+	def __init__(self, database="Crawler database.db"):
 		self.id = 1.0
-		self.database = sqlite3.connect("Crawler database.db")
+		self.database = sqlite3.connect(database)
 		self.cursor = self.database.cursor()
 		
 		try:
 			self.cursor.execute("CREATE TABLE links (link text, type text, crawled real, id real)")
-			self.cursor.execute("INSERT INTO links VALUES ('%s', 'text', 0, 1)" % start_link)
 		except (sqlite3.OperationalError):
-			self.id = self.cursor.execute('SELECT max(id) FROM links').fetchone()[0]+1
+			pass
 		self.database.commit()
-		print self.id
 		
+	def add_link(self, link):
+		id = self.cursor.execute('SELECT max(id) FROM links').fetchone()[0]
 		
+		if (id == None):
+			id = 1.0
+		else:
+			id += 1.0
+		
+		self.cursor.execute("INSERT INTO links VALUES ('%s', 'text', 0, %d)" % (link, id))
+		self.database.commit()
 	
 	def crawl(self):
 		row = self.cursor.execute('SELECT * FROM links WHERE crawled=0 AND type="text" ORDER BY id').fetchone()
-		url = row[0]
+		url = row[0]#it means there is nothing to crawl in database, use -a to add link to it
 		self.id = row[3]
 		self.cursor.execute("UPDATE links SET crawled=1 WHERE id="+str(self.id))
 		
@@ -75,12 +95,17 @@ class Crawler:
 				if len(exist):
 					pass
 				else:
-					content = get_content(urllib.urlopen(link).info())
+					content = get_content(urllib.urlopen(link).info())#slow down the link add
+					#but at least you know if its a video, image, or text
+					#content = "text"
 					self.id =self.cursor.execute('SELECT max(id) FROM links').fetchone()[0]+1.0
 					self.cursor.execute("INSERT INTO links VALUES ('%s', '%s', %d, %d)" % (link,content,0,self.id))
 				self.database.commit()
 				print(str(self.id)+"\t"+link)
-			except:
+			except (KeyboardInterrupt):
+				print("[*] Keyboard Interrupt")
+				database.close()
+			except (IOError, sqlite3.OperationalError):
 				pass
 		
 		
@@ -89,4 +114,13 @@ class Crawler:
 
 
 if (__name__ == "__main__"):
-	Crawler("http://www.google.com").crawl()
+	try:
+		c = Crawler(sys.argv[1])
+		if (sys.argv[2]=="-a"):
+			c.add_link(sys.argv[3])
+		elif (sys.argv[2] == "-c"):
+			c.crawl()
+	except (IndexError):
+		print(__help__)
+	
+	
