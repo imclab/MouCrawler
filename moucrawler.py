@@ -104,7 +104,8 @@ class Crawler:
 				print(str(self.id)+"\t"+link)
 			except (KeyboardInterrupt):
 				print("[*] Keyboard Interrupt")
-				database.close()
+				self.database.close()
+				sys.exit(0)
 			except (IOError, sqlite3.OperationalError):
 				pass
 		
