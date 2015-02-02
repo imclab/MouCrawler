@@ -60,7 +60,7 @@ class Crawler:
 		self.cursor.execute("UPDATE links SET crawled=1 WHERE id="+str(self.id))
 		
 		
-		print("Crawling "+url)
+		print("[*] Crawling "+url)
 		links = []
 		try:
 			links = list(get_links(url))
@@ -71,20 +71,19 @@ class Crawler:
 		
 		for link in links:
 			try:
-				print(link)
 				exist = self.cursor.execute("SELECT * FROM links WHERE link='%s'" % link).fetchall()
 				if len(exist):
 					pass
 				else:
 					content = get_content(urllib.urlopen(link).info())
-					self.id+=self.cursor.execute('SELECT max(id) FROM links').fetchone()[0]+1
+					self.id =self.cursor.execute('SELECT max(id) FROM links').fetchone()[0]+1.0
 					self.cursor.execute("INSERT INTO links VALUES ('%s', '%s', %d, %d)" % (link,content,0,self.id))
-				
+				self.database.commit()
+				print(str(self.id)+"\t"+link)
 			except:
 				pass
 		
 		
-		self.database.commit()
 		self.crawl()
 		return 0
 
