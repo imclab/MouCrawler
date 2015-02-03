@@ -79,8 +79,10 @@ class Crawler:
 		self.id = row[3]
 		self.cursor.execute("UPDATE links SET crawled=1 WHERE id="+str(self.id))
 		
-		
-		print("[*] Crawling "+url)
+		try:
+			print("[*] Crawling "+url)
+		except (UnicodeEncodeError):
+			pass
 		links = []
 		try:
 			links = list(get_links(url))
@@ -106,7 +108,7 @@ class Crawler:
 				print("[*] Keyboard Interrupt")
 				self.database.close()
 				sys.exit(0)
-			except (IOError, sqlite3.OperationalError):
+			except (IOError, UnicodeEncodeError, sqlite3.OperationalError):
 				pass
 		
 		
